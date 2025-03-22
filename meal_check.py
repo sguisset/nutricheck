@@ -2,7 +2,7 @@ import streamlit as st
 
 st.set_page_config(page_title="Meal Analysis", layout="centered")
 st.title("Analyse de ton repas")
-st.markdown("Cette application évalue ton repas selon ton répas")
+st.markdown("Cette application évalue ton repas")
 
 st.header("1. Téléverse une photo (optionnel)")
 st.file_uploader("Image du repas (non utilisée pour l’instant)", type=["jpg", "jpeg", "png"])
