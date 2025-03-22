@@ -1,73 +1,32 @@
 import streamlit as st
+import requests
+import base64
 
-st.set_page_config(page_title="Meal Analysis", layout="centered")
-st.title("Analyse de ton repas")
-st.markdown("Cette application évalue ton repas")
+st.set_page_config(page_title="Analyse Repas Santé", layout="centered")
+st.title("Analyse intelligente de ton repas")
 
-st.header("1. Téléverse une photo (optionnel)")
-st.file_uploader("Image du repas (non utilisée pour l’instant)", type=["jpg", "jpeg", "png"])
+st.markdown("Cette application détecte les aliments à partir d'une photo et analyse leur impact selon ton régime personnalisé (sarcoïdose, protéinurie, acide urique, régime LUV).")
 
-st.header("2. Sélectionne les aliments présents dans ton repas")
-aliments = [
-    "Tofu", "Œuf", "Saumon", "Poulet", "Pois chiches", "Lentilles", "Riz basmati", "Quinoa",
-    "Pain de seigle", "Pain complet", "Avocat", "Amandes", "Graines de courge", "Brocolis", "Courgettes",
-    "Épinards", "Fenouil", "Carottes", "Betteraves", "Tomates", "Concombres", "Cerises", "Myrtilles",
-    "Poire", "Pomme", "Dattes", "Fromage blanc", "Yaourt nature", "Gyoza végétarien", "Aubergines"
-]
-selection = st.multiselect("Quels aliments sont présents ?", aliments)
+# --- 1. Upload de l’image et reconnaissance automatique ---
+st.header("1. Téléverse une photo de ton repas")
 
-st.header("3. Résultat de l'analyse")
+uploaded_file = st.file_uploader("Choisis une image", type=["jpg", "jpeg", "png"])
 
-def analyse(selection):
-    score = 0
-    remarques = []
+detected_food = []
 
-    proteines_veg = {"Tofu", "Pois chiches", "Lentilles"}
-    if any(a in proteines_veg for a in selection):
-        score += 1
-        remarques.append("✔ Bon apport en protéines végétales.")
+if uploaded_file is not None:
+    st.image(uploaded_file, caption="Ton repas", use_column_width=True)
 
-    proteines_anim = {"Œuf", "Saumon", "Poulet"}
-    if any(a in proteines_anim for a in selection):
-        score += 0.5
-        remarques.append("ℹ️ Protéines animales présentes (à modérer si protéinurie).")
+    image_bytes = uploaded_file.read()
+    encoded_image = base64.b64encode(image_bytes).decode("utf-8")
 
-    purines = {"Lentilles", "Pois chiches", "Saumon", "Dattes"}
-    if any(a in purines for a in selection):
-        score -= 0.5
-        remarques.append("⚠️ Présence d’aliments modérément riches en purines.")
+    st.write("Analyse automatique en cours...")
 
-    bons_lipides = {"Avocat", "Amandes", "Graines de courge"}
-    if any(a in bons_lipides for a in selection):
-        score += 1
-        remarques.append("✔ Présence de bons lipides anti-inflammatoires.")
+    url = "https://spoonacular-recipe-food-nutrition-v1.p.rapidapi.com/food/images/analyze"
+    headers = {
+        "content-type": "application/json",
+        "X-RapidAPI-Key": "TA_CLE_API_ICI",  # <<< Remplace par ta clé personnelle
+        "X-RapidAPI-Host": "spoonacular-recipe-food-nutrition-v1.p.rapidapi.com"
+    }
 
-    alcalins = {"Épinards", "Fenouil", "Concombres", "Betteraves", "Courgettes"}
-    if any(a in alcalins for a in selection):
-        score += 1
-        remarques.append("✔ Aliments alcalinisants présents, bon pour les reins.")
-
-    antioxydants = {"Cerises", "Myrtilles", "Poire", "Pomme"}
-    if any(a in antioxydants for a in selection):
-        score += 1
-        remarques.append("✔ Fruits riches en antioxydants présents.")
-
-    if score >= 3.5:
-        conclusion = "✅ Repas équilibré et bien adapté à ton régime."
-    elif 2 <= score < 3.5:
-        conclusion = "🟡 Repas correct, mais quelques ajustements possibles."
-    else:
-        conclusion = "🔴 Ce repas est à modérer selon tes objectifs santé."
-
-    return conclusion, remarques
-
-if selection:
-    conclusion, remarques = analyse(selection)
-    st.subheader("🧾 Conclusion :")
-    st.success(conclusion)
-
-    st.subheader("🔎 Détails :")
-    for r in remarques:
-        st.markdown(f"- {r}")
-else:
-    st.info("👉 Sélectionne les aliments pour afficher l’analyse.")
+    response = requests.post(url, json={"image": encoded_image},
