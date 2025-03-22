@@ -25,7 +25,7 @@ if uploaded_file is not None:
     url = "https://spoonacular-recipe-food-nutrition-v1.p.rapidapi.com/food/images/analyze"
     headers = {
         "content-type": "application/json",
-        "X-RapidAPI-Key": "TA_CLE_API_ICI",  # <<< Remplace par ta clé personnelle
+        "X-RapidAPI-Key": "448e007b0fmsh689d7d5d6621861p10e37fjsn72e1ee5e6e1c",  # <<< Remplace par ta clé personnelle
         "X-RapidAPI-Host": "spoonacular-recipe-food-nutrition-v1.p.rapidapi.com"
     }
 
